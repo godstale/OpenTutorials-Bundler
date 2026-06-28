@@ -1,0 +1,62 @@
+{
+  "slug": "my-course",
+  "title": "강좌 제목 (예: 인공지능의 이해)",
+  "description": "강좌에 대한 짧은 소개글을 작성합니다.",
+  "author": "작가 이름",
+  "cards": [
+    "01-intro.mdx",
+    "02-main-topic.mdx",
+    "03-deep-dive.mdx",
+    "04-summary.mdx"
+  ],
+  "toc": [
+    {
+      "type": "chapter",
+      "title": "제1장. 시작하기",
+      "description": "강좌의 목표와 핵심 개념을 소개합니다.",
+      "children": [
+        {
+          "type": "section",
+          "title": "강좌 소개",
+          "description": "강좌의 목표와 전체 구성을 소개합니다.",
+          "filename": "01-intro.mdx"
+        },
+        {
+          "type": "section",
+          "title": "핵심 개념",
+          "description": "이 강좌에서 다룰 핵심 개념을 설명합니다.",
+          "filename": "02-main-topic.mdx"
+        }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "제2장. 심화 학습",
+      "description": "핵심 개념을 더 깊이 파고듭니다.",
+      "children": [
+        {
+          "type": "section",
+          "title": "심화 내용",
+          "description": "고급 주제와 실제 적용 사례를 다룹니다.",
+          "filename": "03-deep-dive.mdx"
+        },
+        {
+          "type": "section",
+          "title": "마무리",
+          "description": "강좌 전체 내용을 정리하고 다음 단계를 안내합니다.",
+          "filename": "04-summary.mdx"
+        }
+      ]
+    }
+  ],
+  "checkpoints": [
+    {
+      "afterCard": "02-main-topic.mdx",
+      "prompt": "지금까지 배운 핵심 개념에 대해 학습자가 잘 이해했는지 확인하기 위해, 일상 생활에서의 예시를 하나 들어보라고 질문하세요."
+    },
+    {
+      "afterCard": "04-summary.mdx",
+      "prompt": "강좌 전체에서 가장 인상 깊었던 내용이 무엇인지, 그 이유와 함께 이야기해보도록 유도하세요."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+# User source files — add your course materials to origin/<course-name>/
+origin/*/
+
+# Generated course bundles
+converted/*/
+
+# Screenshots and media
+docs/screenshot/
+
+# Internal planning documents
+docs/superpowers/
+
+# Skill system (auto-managed by Claude Code)
+.agents/
+.claude/skills/
+
+# IDE
+.vscode/
+
+# Temporary files
+_temp_extract.txt
+*.tmp
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
