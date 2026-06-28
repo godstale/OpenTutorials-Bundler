@@ -133,6 +133,8 @@ def load_config(course_dir: Path) -> dict:
 def convert_card(path: Path) -> str:
     with open(path, encoding="utf-8") as f:
         text = f.read()
+    # ../images/ → images/ (preview.html is one level above cards/)
+    text = text.replace("../images/", "images/")
     md = markdown.Markdown(extensions=["extra", "nl2br"])
     return md.convert(text)
 
