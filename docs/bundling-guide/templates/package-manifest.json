@@ -1,0 +1,12 @@
+{
+  "title": "패키지 제목 (예: 아두이노 IoT 마스터 클래스)",
+  "slug": "package-slug",
+  "description": "패키지 로드맵 요약. 어떤 강좌들이 포함되며 학습 후 무엇을 할 수 있는지 설명합니다.",
+  "thumbnail": "cover.png",
+  "published": true,
+  "courses": [
+    "course-slug-ch01",
+    "course-slug-ch02",
+    "course-slug-ch03"
+  ]
+}
