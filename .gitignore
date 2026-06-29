@@ -3,6 +3,7 @@ origin/*/
 
 # Generated course bundles
 converted/*/
+converted/*-pkg.zip
 
 # Screenshots and media
 docs/screenshot/
