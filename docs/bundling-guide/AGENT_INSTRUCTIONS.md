@@ -38,6 +38,14 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
      2. 모든 노드에 `type`, `title`, `description` 필드 존재
      3. `slug`가 소문자 영문·숫자·하이픈으로만 구성되었는지 확인
 
+3-b. **패키지 매니페스트 생성 단계 (패키지 포함 시)**
+   - 하나의 원본에서 여러 강좌를 나누어 만드는 경우, 모든 강좌 번들 생성 완료 후 실행한다.
+   - `packages/<package-slug>/` 폴더를 만들고 `package-manifest.json`을 작성한다.
+   - 스키마: `title`(필수), `slug`(선택), `description`(필수), `thumbnail`(선택), `published`(선택), `courses`(필수 — 강좌 슬러그 목록, 학습 순서대로)
+   - 패키지 검증 체크리스트 [P1]~[P3] 통과 확인
+   - `python tools/build_package.py <package-slug>` 실행 → `converted/<package-slug>-pkg.zip` 생성
+   - 템플릿: `docs/bundling-guide/templates/package-manifest.json`
+
 4. **검토 및 패키징 안내 단계 (Review & Packaging)**
    - 사용자에게 모든 파일의 코드를 제공한 뒤, 로컬 PC에서 폴더를 만들고 파일들을 저장한 후 `images` 폴더를 추가하여 ZIP으로 압축하라고 안내합니다.
 
@@ -83,3 +91,4 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
 - **목차(toc) 필드 필수**: `config.json`에 반드시 `"toc"` 배열을 포함해야 합니다. `toc`는 **장-절-항 계층 트리** 구조입니다. leaf 노드에 `filename`을 기재하며, toc의 모든 leaf `filename` 집합과 `cards[]` 집합이 완전히 일치해야 합니다. 불일치 시 서비스 등록 오류가 발생합니다. 상세 스펙은 `COURSE_STRUCTURE_GUIDE.md` 참조.
 - **웹 표준 경로 준수**: MDX 파일 내의 이미지 참조 경로(`![img](../images/...)`)나 설정 파일의 카드 리스트 등 모든 경로 구분자는 운영체제와 상관없이 반드시 웹 표준인 슬래시(`/`)를 사용해야 합니다. 역슬래시(`\`)는 절대 사용하지 마세요.
 - MDX 파일 작성 시, 복잡한 React 컴포넌트보다는 기본 Markdown 문법(Heading, List, Bold, Blockquote)을 위주로 사용하세요.
+- **패키지 포함 시 강좌 순서 표시 필수**: 하나의 원본을 여러 강좌로 나눌 때, 각 강좌의 slug는 `<course-name>-ch01` 형식으로, `config.json`의 `title`은 `"Part 1: <강좌 제목>"` 또는 `"Chapter 1: <강좌 제목>"` 형식으로 순서를 명시한다.
