@@ -24,6 +24,11 @@ def build_package(package_slug: str) -> None:
     courses = manifest.get("courses", [])
     thumbnail = manifest.get("thumbnail")
 
+    # courses 빈 목록 검사
+    if not courses:
+        print("ERROR: courses 목록이 비어 있습니다. package-manifest.json을 확인하세요.")
+        sys.exit(1)
+
     # [P1] courses 슬러그 존재 확인
     missing = [s for s in courses if not os.path.isdir(os.path.join(converted_dir, s))]
     if missing:
