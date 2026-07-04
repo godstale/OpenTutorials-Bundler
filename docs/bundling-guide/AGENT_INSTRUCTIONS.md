@@ -38,12 +38,26 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
      2. 모든 노드에 `type`, `title`, `description` 필드 존재
      3. `slug`가 소문자 영문·숫자·하이픈으로만 구성되었는지 확인
 
-3-b. **패키지 매니페스트 생성 단계 (패키지 포함 시)**
+3-b. **패키지 번들 생성 단계 (패키지 포함 시)**
    - 하나의 원본에서 여러 강좌를 나누어 만드는 경우, 모든 강좌 번들 생성 완료 후 실행한다.
    - `packages/<package-slug>/` 폴더를 만들고 `package-manifest.json`을 작성한다.
-   - 스키마: `title`(필수), `slug`(선택), `description`(필수), `thumbnail`(선택), `published`(선택), `courses`(필수 — 강좌 슬러그 목록, 학습 순서대로)
-   - 패키지 검증 체크리스트 [P1]~[P3] 통과 확인
-   - `python tools/build_package.py <package-slug>` 실행 → `converted/<package-slug>-pkg.zip` 생성
+   - **스키마 (통합 강좌 매니페스트)**:
+     - `title` (string, 필수): 통합 강좌 전체 타이틀
+     - `slug` (string, 필수): URL용 영문 식별자 (소문자·숫자·하이픈)
+     - `description` (string, 필수): 전체 강좌 요약 설명
+     - `thumbnail` (string, 필수): 플랫폼 아이콘 (`"icon:{ID}"`) 또는 이미지 파일명. 생략 시 기본값 `"icon:book"`. 아이콘 목록: `docs/bundling-guide/GUIDE_THUMBNAIL_INTEGRATION.md`
+     - `published` (boolean, 필수): 기본값 `true`
+     - `sequential_play` (boolean, 필수): 이전 강좌 완료 후 다음 진입 강제 여부. 기본값 `false`. 미션형/순서 의존 강좌에는 `true` 설정
+     - `force_checkpoint` (boolean, 필수): 체크포인트 통과 강제 여부. 기본값 `false`. 고난도 교육 과정에는 `true` 설정
+     - `version` (string, 선택/권장): 패키지 버전. 권장 포맷 `X.Y.Z` (예: `"1.0.0"`). 생략 시 기본값 `"1.0.0"`으로 자동 폴백
+     - `changelog` (string, 선택): 업데이트/수정 사항 요약 텍스트. 줄바꿈 시 `\n` 이스케이프 문자 사용. 생략 시 기본값 `"최초 릴리즈"`로 자동 폴백
+     - `courses` (array, 필수): 하위 강좌 메타데이터 배열 (CourseMeta 객체 순서대로). 각 원소:
+       - `slug` (string, 필수): 하위 강좌 데이터베이스 고유 식별자
+       - `title` (string, 필수): 파트/하위 강좌 노출 타이틀
+       - `description` (string, 필수): 해당 파트 요약 설명
+       - `tags` (array, 필수): 검색용 태그 **최소 3개** (기술명, 도구명, 실무 역량 등. 공백 없는 문자열)
+   - 패키지 검증 체크리스트 [P0]~[P6] 통과 확인
+   - `python tools/build_package.py <package-slug>` 실행 → `converted/<package-slug>.zip` 생성 (package-manifest.json + thumbnail.png(선택) + courses/<slug>.zip 포함)
    - 템플릿: `docs/bundling-guide/templates/package-manifest.json`
 
 4. **검토 및 패키징 안내 단계 (Review & Packaging)**
@@ -92,3 +106,5 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
 - **웹 표준 경로 준수**: MDX 파일 내의 이미지 참조 경로(`![img](../images/...)`)나 설정 파일의 카드 리스트 등 모든 경로 구분자는 운영체제와 상관없이 반드시 웹 표준인 슬래시(`/`)를 사용해야 합니다. 역슬래시(`\`)는 절대 사용하지 마세요.
 - MDX 파일 작성 시, 복잡한 React 컴포넌트보다는 기본 Markdown 문법(Heading, List, Bold, Blockquote)을 위주로 사용하세요.
 - **패키지 포함 시 강좌 순서 표시 필수**: 하나의 원본을 여러 강좌로 나눌 때, 각 강좌의 slug는 `<course-name>-ch01` 형식으로, `config.json`의 `title`은 `"Part 1: <강좌 제목>"` 또는 `"Chapter 1: <강좌 제목>"` 형식으로 순서를 명시한다.
+- **패키지 courses[] 형식 준수**: `courses[]`는 슬러그 문자열 배열이 아닌 **CourseMeta 객체 배열**이다. 각 원소에 `slug`, `title`, `description`, `tags` 4개 필드를 모두 포함해야 한다. 기존 문자열 배열 형식은 `build_package.py`가 오류로 거부한다.
+- **tags 검색 최적화**: 각 하위 강좌의 `tags` 배열에는 핵심 기술명·도구명·실무 역량 키워드를 **3개 이상** 반드시 추출하여 기재한다. tags는 플랫폼 검색 화면의 매칭 소스로 직접 활용된다.

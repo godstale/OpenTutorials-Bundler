@@ -2,14 +2,21 @@
 origin/*/
 
 # Generated course bundles
-converted/*/
-converted/*-pkg.zip
+converted/*
+!converted/.gitkeep
+packages/*
+!packages/.gitkeep
 
 # Screenshots and media
 docs/screenshot/
 
 # Internal planning documents
+docs/migrations/
 docs/superpowers/
+docs/bundling-guide/course-package-bundler-guide.md
+docs/bundling-guide/integrated-course-guide.md
+docs/bundling-guide/GUIDE_VERSION_CHANGELOG_INTEGRATION.md
+.superpowers/*
 
 # Skill system (auto-managed by Claude Code)
 .agents/

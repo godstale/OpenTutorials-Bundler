@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a standalone HTML preview for a PennyPress course bundle."""
+"""Generate a standalone HTML preview for an Open Tutor course bundle."""
 
 import sys
 import json
