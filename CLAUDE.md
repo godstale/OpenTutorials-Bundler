@@ -11,7 +11,7 @@ Open Tutor는 카드(페이지) 단위 콘텐츠를 AI 튜터와 인터랙티브
 ## 폴더 구조
 
 ```
-PennyPress-Books/
+OpenTutorials-Bundler/
 ├── origin/
 │   └── <course-name>/          ← 사용자가 원본 자료 배치 (PDF, DOCX, 이미지 등)
 │       └── images/             ← 강좌에 사용할 이미지 (선택)

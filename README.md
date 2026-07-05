@@ -1,5 +1,8 @@
 # Open Tutor Bundler
 
+> **Course Bundler Protocol Version**: `v1.0.0`
+
+
 AI Agent(Claude Code, GitHub Copilot, Gemini CLI 등)를 활용하여 PDF, DOCX 등 원본 자료를 **Open Tutor** 플랫폼에 등록 가능한 강좌 번들(ZIP)로 자동 변환하는 워크스페이스입니다.
 
 사용자는 `origin/<course-name>/` 폴더에 책, 강의 자료 등 원본 리소스만 넣으면 됩니다. AI Agent가 자료를 분석해 카드(페이지 단위 MDX), 목차(config.json), AI 튜터 지식 베이스(wiki.md)를 생성하고, 검증을 거쳐 업로드용 ZIP까지 만들어 줍니다.
@@ -53,7 +56,7 @@ Open Tutor는 카드(페이지) 단위 콘텐츠를 AI 튜터와 인터랙티브
 ## 폴더 구조
 
 ```
-PennyPress-Books/
+OpenTutorials-Bundler/
 ├── origin/
 │   └── <course-name>/          ← 사용자가 원본 자료 배치 (PDF, DOCX, 이미지 등)
 │       └── images/             ← 강좌에 사용할 이미지 (선택)
@@ -97,8 +100,8 @@ PennyPress-Books/
 ### 1. 저장소 클론
 
 ```bash
-git clone https://github.com/godstale/Open-Tutor-Bundler.git
-cd Open-Tutor-Bundler
+git clone https://github.com/godstale/OpenTutorials-Bundler.git
+cd OpenTutorials-Bundler
 ```
 
 ### 2. 원본 자료 배치
