@@ -8,6 +8,10 @@
   "force_checkpoint": false,
   "version": "1.0.0",
   "changelog": "최초 릴리즈",
+  "bundler_protocol_version": "1.1.0",
+  "target_age": "전연령",
+  "category": "Programming",
+  "tags": ["IoT", "Arduino", "Embedded"],
   "courses": [
     {
       "slug": "course-slug-ch01",
@@ -23,3 +27,4 @@
     }
   ]
 }
+
