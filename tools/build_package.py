@@ -61,9 +61,13 @@ def build_package(package_slug: str) -> None:
     for slug in slugs:
         zip_path = os.path.join(converted_dir, slug, f"{slug}.zip")
         if not os.path.isfile(zip_path):
-            missing.append(f"converted/{slug}/{slug}.zip")
-        else:
-            course_zip_paths[slug] = zip_path
+            pkg_sub_zip_path = os.path.join(converted_dir, package_slug, slug, f"{slug}.zip")
+            if os.path.isfile(pkg_sub_zip_path):
+                zip_path = pkg_sub_zip_path
+            else:
+                missing.append(f"converted/{slug}/{slug}.zip or converted/{package_slug}/{slug}/{slug}.zip")
+                continue
+        course_zip_paths[slug] = zip_path
     if missing:
         print("ERROR [P1]: 다음 강좌 ZIP 파일이 없습니다 (먼저 개별 강좌 ZIP을 생성하세요):")
         for m in missing:

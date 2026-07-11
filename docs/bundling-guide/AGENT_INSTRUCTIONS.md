@@ -13,7 +13,7 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
 모든 강좌는 최종적으로 아래 구조의 파일들을 포함한 ZIP 파일로 패키징되어야 합니다.
 당신의 역할은 아래 파일들의 텍스트 내용(코드)을 모두 작성해주는 것입니다.
 
-1. `package-manifest.json`: 강좌의 메타데이터, 프로토콜 버전, 대상 연령대 및 카테고리를 정의하는 파일 (프로토콜 1.1.0 기준 필수).
+1. `package-manifest.json`: 강좌의 메타데이터, 프로토콜 버전, 작성자 정보(닉네임, 이메일, 홈페이지), 대상 연령대 및 카테고리를 정의하는 파일 (프로토콜 1.1.1 기준 필수).
 2. `config.json`: 강좌의 메타데이터, 카드(페이지) 순서, 체크포인트 트리거 위치 정의.
 3. `cards/*.mdx` 또는 `cards/*.json`: 각 페이지의 본문. (1페이지 = 1 MDX 파일 또는 동영상 카드 JSON 파일). 마크다운과 컴포넌트 활용 가능. 이미지 경로는 로컬 경로(`../images/파일명.png` 등)로 작성.
 4. `wiki.md`: AI Agent(학습자를 가르칠 튜터 AI)가 참고할 강좌 전체의 배경 지식, 맥락, 핵심 용어 사전.
@@ -30,13 +30,13 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
    - 각 `cards/*.mdx` 파일의 내용을 차례대로 작성합니다. 아래 **카드 작성 품질 기준**을 반드시 준수합니다.
    
 3. **설정 및 매니페스트 파일 생성 단계 (Configuring)**
-   - 강좌 루트에 `package-manifest.json`을 작성합니다. 필수 프로토콜 항목(`bundler_protocol_version: "1.1.0"`, `target_age`, `category`)을 설정하고 제목 및 기본 정보를 정의합니다. 선택적으로 `tags` (Array of String)도 추가합니다.
+   - 강좌 루트에 `package-manifest.json`을 작성합니다. 필수 프로토콜 항목(`bundler_protocol_version: "1.1.1"`, `author` (nickname, email, website), `target_age`, `category`)을 설정하고 제목 및 기본 정보를 정의합니다. 선택적으로 `tags` (Array of String)도 추가합니다.
    - 생성된 카드들의 파일명과 체크포인트를 바탕으로 `config.json`을 작성합니다.
    - `toc`는 **장(chapter) → 절(section) → 항(subsection)** 계층 트리로 작성합니다. 3단계를 모두 쓸 필요는 없으며, 콘텐츠 구조에 맞는 단계만 사용합니다.
    - leaf 노드(실제 카드와 연결되는 최하위 노드)에는 반드시 `filename` 필드를 포함합니다.
    - **`filename` 값은 파일명만 기재합니다** (`"01-intro.mdx"` ✓, `"cards/01-intro.mdx"` ✗)
    - `config.json` 및 `package-manifest.json` 완성 후 아래 항목을 반드시 자가 검증합니다:
-     1. `package-manifest.json`의 `"bundler_protocol_version"`이 `"1.1.0"`인지, `target_age`와 `category` 필드가 올바른 값으로 존재하며 `tags`가 형식에 맞는지 확인
+      1. `package-manifest.json`의 `"bundler_protocol_version"`이 `"1.1.1"`인지, `author` (nickname 필수, email, website 선택), `target_age`와 `category` 필드가 올바른 값으로 존재하며 `tags`가 형식에 맞는지 확인
      2. toc 트리의 모든 leaf node `filename` 집합 == `cards[]` 집합 (불일치 시 즉시 수정)
      3. 모든 노드에 `type`, `title`, `description` 필드 존재
      4. `slug`가 소문자 영문·숫자·하이픈으로만 구성되었는지 확인
@@ -49,8 +49,9 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
      - `title` (string, 필수): 통합 강좌 전체 타이틀
      - `slug` (string, 필수): URL용 영문 식별자 (소문자·숫자·하이픈)
      - `description` (string, 필수): 전체 강좌 요약 설명
-     - `bundler_protocol_version` (string, 필수): 이 번들이 준수한 번들러 프로토콜 명세 버전 (`"1.1.0"`)
-     - `target_age` (string, 필수): 강좌 수강 대상 권장 연령대 (예: `"전연령"`, `"초등학생"`, `"10대"`, `"성인"`)
+      - `bundler_protocol_version` (string, 필수): 이 번들이 준수한 번들러 프로토콜 명세 버전 (`"1.1.1"`)
+      - `author` (object, 필수): 강좌 작성자 정보. `nickname`(필수), `email`(선택), `website`(선택) 필드 포함.
+      - `target_age` (string, 필수): 강좌 수강 대상 권장 연령대 (예: `"전연령"`, `"초등학생"`, `"10대"`, `"성인"`)
      - `category` (string, 필수): 강좌의 대분류 카테고리 (예: `"Programming"`, `"Design"`, `"Marketing"`, `"Math"`)
      - `tags` (array, 선택): 통합 강좌 자체의 태그 목록 (`string[]`)
      - `thumbnail` (string, 필수): 플랫폼 아이콘 (`"icon:{ID}"`) 또는 이미지 파일명. 생략 시 기본값 `"icon:book"`. 아이콘 목록: `docs/bundling-guide/GUIDE_THUMBNAIL_INTEGRATION.md`
@@ -122,7 +123,7 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
 - **패키지 포함 시 강좌 순서 표시 필수**: 하나의 원본을 여러 강좌로 나눌 때, 각 강좌의 slug는 `<course-name>-ch01` 형식으로, `config.json`의 `title`은 `"Part 1: <강좌 제목>"` 또는 `"Chapter 1: <강좌 제목>"` 형식으로 순서를 명시한다.
 - **패키지 courses[] 형식 준수**: `courses[]`는 슬러그 문자열 배열이 아닌 **CourseMeta 객체 배열**이다. 각 원소에 `slug`, `title`, `description`, `tags` 4개 필드를 모두 포함해야 한다. 기존 문자열 배열 형식은 `build_package.py`가 오류로 거부한다.
 - **tags 검색 최적화**: 각 하위 강좌의 `tags` 배열에는 핵심 기술명·도구명·실무 역량 키워드를 **3개 이상** 반드시 추출하여 기재한다. tags는 플랫폼 검색 화면의 매칭 소스로 직접 활용된다.
-- **프로토콜 버전 명시 필수**: 강좌 번들 파일을 제작할 때 사용된 프로토콜 버전을 반드시 `package-manifest.json` 의 `bundler_protocol_version` 필드에 정확히 명시해야 합니다. (예: `"1.1.0"`)
+- **프로토콜 버전 명시 필수**: 강좌 번들 파일을 제작할 때 사용된 프로토콜 버전을 반드시 `package-manifest.json` 의 `bundler_protocol_version` 필드에 정확히 명시해야 합니다. (예: `"1.1.1"`)
 - **동영상 자막 사용 시 탐색 편의성 최적화**: 
   - 새롭게 추가된 동영상 강좌의 경우 자막 기능을 선택적으로 활성화하여 사용할 수 있습니다.
   - 동영상 자막을 사용하는 경우에는 영상의 모든 자막을 전부 넣기보다, **주요 포인트의 자막 또는 안내 메시지**를 포함시킴으로써 학습자가 탐색 패널을 통해 원하는 구간으로 쉽게 탐색(Seek)하고 이동할 수 있도록 배려해야 합니다.

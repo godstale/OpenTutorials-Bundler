@@ -2,7 +2,11 @@
   "slug": "my-course",
   "title": "강좌 제목 (예: 인공지능의 이해)",
   "description": "강좌에 대한 짧은 소개글을 작성합니다.",
-  "author": "작가 이름",
+  "author": {
+    "nickname": "작가 닉네임",
+    "email": "이메일 (옵션)",
+    "website": "홈페이지URL (옵션)"
+  },
   "cards": [
     "01-intro.mdx",
     "02-main-topic.mdx",
