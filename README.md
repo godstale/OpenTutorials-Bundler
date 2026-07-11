@@ -1,9 +1,9 @@
-# Open Tutor Bundler
+# Open Tutorials Bundler
 
 > **Course Bundler Protocol Version**: `v1.0.0`
 
 
-AI Agent(Claude Code, GitHub Copilot, Gemini CLI 등)를 활용하여 PDF, DOCX 등 원본 자료를 **Open Tutor** 플랫폼에 등록 가능한 강좌 번들(ZIP)로 자동 변환하는 워크스페이스입니다.
+AI Agent(Claude Code, GitHub Copilot, Gemini CLI 등)를 활용하여 PDF, DOCX 등 원본 자료를 **Open Tutorials** 플랫폼에 등록 가능한 강좌 번들(ZIP)로 자동 변환하는 워크스페이스입니다.
 
 사용자는 `origin/<course-name>/` 폴더에 책, 강의 자료 등 원본 리소스만 넣으면 됩니다. AI Agent가 자료를 분석해 카드(페이지 단위 MDX), 목차(config.json), AI 튜터 지식 베이스(wiki.md)를 생성하고, 검증을 거쳐 업로드용 ZIP까지 만들어 줍니다.
 
@@ -27,14 +27,14 @@ AI Agent(Claude Code, GitHub Copilot, Gemini CLI 등)를 활용하여 PDF, DOCX 
 
 ## 프로젝트 목적
 
-Open Tutor는 카드(페이지) 단위 콘텐츠를 AI 튜터와 인터랙티브하게 학습하는 플랫폼입니다. 학습자는 콘텐츠를 보고 들으며(TTS), AI 에게 물어보기도 하며 체크포인트마다 AI와 QnA를 진행합니다.
+Open Tutorials는 카드(페이지) 단위 콘텐츠를 AI 튜터와 인터랙티브하게 학습하는 플랫폼입니다. 학습자는 콘텐츠를 보고 들으며(TTS), AI 에게 물어보기도 하며 체크포인트마다 AI와 QnA를 진행합니다.
 
-이 저장소는 그 플랫폼에 올릴 **강좌 번들을 손으로 일일이 만들지 않고, AI Agent에게 원본 자료만 던져주면 규격에 맞는 산출물이 나오도록** 만든 "번들링 도구 + Agent 지침" 세트입니다. 즉, 콘텐츠 자체를 만드는 서비스가 아니라 **원본 자료 → Open Tutor 규격 산출물** 변환 파이프라인을 관리하는 워크스페이스입니다.
+이 저장소는 그 플랫폼에 올릴 **강좌 번들을 손으로 일일이 만들지 않고, AI Agent에게 원본 자료만 던져주면 규격에 맞는 산출물이 나오도록** 만든 "번들링 도구 + Agent 지침" 세트입니다. 즉, 콘텐츠 자체를 만드는 서비스가 아니라 **원본 자료 → Open Tutorials 규격 산출물** 변환 파이프라인을 관리하는 워크스페이스입니다.
 
 핵심 아이디어:
 1. 사람은 원본 자료를 `origin/`에 두고 "변환해줘"라고 요청만 한다.
 2. AI Agent는 `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`에 정의된 워크플로우와 `docs/bundling-guide/`의 상세 규격을 그대로 따른다.
-3. 산출물은 `converted/`에 파일 단위로 쌓이고, 최종적으로 Open Tutor Admin에 업로드 가능한 ZIP으로 패키징된다.
+3. 산출물은 `converted/`에 파일 단위로 쌓이고, 최종적으로 Open Tutorials Admin에 업로드 가능한 ZIP으로 패키징된다.
 
 ---
 
@@ -43,7 +43,7 @@ Open Tutor는 카드(페이지) 단위 콘텐츠를 AI 튜터와 인터랙티브
 - **원본 자료 → 강좌 번들 자동 변환**: PDF/DOCX 등 원본에서 목차 설계, 카드(MDX) 작성, AI 튜터 지식 베이스(wiki.md) 생성까지 AI Agent가 수행합니다.
 - **장 → 절 → 항 계층 목차(TOC) 자동 설계**: 콘텐츠 분량에 맞춰 트리 깊이를 유연하게 조정합니다(단독 카드는 2단계, 그룹이 있으면 3단계).
 - **체크포인트 자동 배치**: 카드 사이사이에 AI 튜터가 학습자와 QnA를 진행할 지점(`checkpoints[]`)과 프롬프트를 함께 설계합니다.
-- **번들 검증 체크리스트 내장**: ZIP을 만들기 전에 `CLAUDE.md`의 [C1]~[C7], [Z1]~[Z2] 체크리스트를 통과했는지 확인해, Open Tutor 등록 오류를 사전에 차단합니다.
+- **번들 검증 체크리스트 내장**: ZIP을 만들기 전에 `CLAUDE.md`의 [C1]~[C7], [Z1]~[Z2] 체크리스트를 통과했는지 확인해, Open Tutorials 등록 오류를 사전에 차단합니다.
 - **폴더 구조를 보존하는 ZIP 생성**: PowerShell `Compress-Archive`가 하위 폴더를 평탄화하는 문제를 피하기 위해 Python `zipfile` 기반으로 생성합니다.
 - **여러 강좌를 묶는 패키지(통합 번들) 지원**: 원본 하나를 여러 챕터 강좌로 나눠 만들었을 때, `package-manifest.json` + 개별 강좌 ZIP들을 하나의 통합 ZIP으로 묶어 배포할 수 있습니다(`tools/build_package.py`). 패키지 전용 검증 체크리스트([P0]~[P6])도 자동 실행됩니다.
 - **썸네일/플랫폼 아이콘 지정**: 강좌·패키지에 이미지 썸네일 또는 플랫폼 사전 정의 아이콘(`icon:cpu` 등)을 지정할 수 있습니다(`docs/bundling-guide/GUIDE_THUMBNAIL_INTEGRATION.md` 참조).
@@ -69,7 +69,7 @@ OpenTutorials-Bundler/
 │       │   ├── 01-intro.mdx
 │       │   └── ...
 │       ├── images/             ← origin에서 복사 (있는 경우)
-│       ├── <course-name>.zip   ← 변환 완료 후 자동 생성 (Open Tutor 업로드용)
+│       ├── <course-name>.zip   ← 변환 완료 후 자동 생성 (Open Tutorials 업로드용)
 │       └── preview.html        ← (선택) 브라우저 미리보기, ZIP에는 미포함
 │
 ├── packages/
@@ -83,7 +83,7 @@ OpenTutorials-Bundler/
 │   │   ├── COURSE_STRUCTURE_GUIDE.md
 │   │   ├── GUIDE_THUMBNAIL_INTEGRATION.md
 │   │   └── templates/
-│   └── penny-press/            ← Open Tutor(PennyPress) FE 아키텍처 참고 문서
+│   └── penny-press/            ← Open Tutorials FE 아키텍처 참고 문서
 │
 ├── tools/                      ← 패키지 빌드 / 미리보기 생성 스크립트
 │   ├── build_package.py
@@ -143,10 +143,10 @@ converted/
     ├── cards/
     │   ├── 01-intro.mdx
     │   └── ...
-    └── my-course.zip    ← Open Tutor 업로드용 번들
+    └── my-course.zip    ← Open Tutorials 업로드용 번들
 ```
 
-생성된 ZIP 파일을 Open Tutor Admin에서 업로드하면 강좌가 등록됩니다.
+생성된 ZIP 파일을 Open Tutorials Admin에서 업로드하면 강좌가 등록됩니다.
 
 ### 5. (선택) 브라우저에서 미리 확인
 
@@ -201,7 +201,7 @@ python tools/generate_preview.py my-course
 - `cards[]` (필수): 학습 표시 순서대로 나열한 MDX 파일명 배열. `cards/` 접두어 없이 파일명만 기재합니다(서비스가 `cards/` 폴더를 자동 참조).
 - `checkpoints[]` (선택): `afterCard`(파일명만) + `prompt`(AI 튜터에게 줄 QnA 지시).
 
-> **필수 검증**: toc 트리의 모든 leaf `filename` 집합과 `cards[]` 집합은 정확히 일치해야 합니다. 하나라도 다르면 Open Tutor 등록 오류가 발생합니다.
+> **필수 검증**: toc 트리의 모든 leaf `filename` 집합과 `cards[]` 집합은 정확히 일치해야 합니다. 하나라도 다르면 Open Tutorials 등록 오류가 발생합니다.
 
 ### cards/*.mdx
 
@@ -309,7 +309,7 @@ python tools/build_package.py <package-slug>
 | [Agent 지침](docs/bundling-guide/AGENT_INSTRUCTIONS.md) | AI Agent를 위한 카드 작성 품질 기준 |
 | [썸네일/아이콘 연동 가이드](docs/bundling-guide/GUIDE_THUMBNAIL_INTEGRATION.md) | 강좌·패키지 썸네일 및 플랫폼 아이콘 지정 방법 |
 | [템플릿](docs/bundling-guide/templates/) | config.json, card.mdx, wiki.md, package-manifest.json 예시 |
-| [PennyPress FE 참고](docs/penny-press/README.md) | Open Tutor(PennyPress) 플랫폼 아키텍처 |
+| [PennyPress FE 참고](docs/penny-press/README.md) | Open Tutorials 플랫폼 아키텍처 |
 
 ---
 
@@ -322,7 +322,7 @@ python tools/build_package.py <package-slug>
 | ZIP 이미 존재 | 덮어쓰기 |
 | toc leaf 노드 집합 ≠ `cards[]` 집합 | ZIP 생성 전 반드시 수정 (불일치 상태로 ZIP 생성 금지) |
 
-ZIP 생성 전에는 항상 `CLAUDE.md`의 번들 검증 체크리스트([C1]~[C7], [Z1]~[Z2], 패키지는 [P0]~[P6])를 통과해야 합니다. 체크리스트는 실제 Open Tutor 등록 오류 이력을 바탕으로 계속 추가되므로, 새로운 등록 오류가 발견되면 해당 문서에 항목을 추가합니다.
+ZIP 생성 전에는 항상 `CLAUDE.md`의 번들 검증 체크리스트([C1]~[C7], [Z1]~[Z2], 패키지는 [P0]~[P6])를 통과해야 합니다. 체크리스트는 실제 Open Tutorials 등록 오류 이력을 바탕으로 계속 추가되므로, 새로운 등록 오류가 발견되면 해당 문서에 항목을 추가합니다.
 
 ---
 

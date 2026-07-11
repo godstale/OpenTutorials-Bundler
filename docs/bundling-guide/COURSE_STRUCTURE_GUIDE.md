@@ -1,7 +1,7 @@
-# Open Tutor 강좌 번들 구조 가이드
+# Open Tutorials 강좌 번들 구조 가이드
 
 강좌 패키지는 폴더를 구성한 뒤 ZIP 형태로 압축하여 업로드해야 합니다.
-Open Tutor 플랫폼은 **장(Chapter) - 절(Section) - 항(Subsection)** 계층 구조를 지원합니다.
+Open Tutorials 플랫폼은 **장(Chapter) - 절(Section) - 항(Subsection)** 계층 구조를 지원합니다.
 
 ---
 

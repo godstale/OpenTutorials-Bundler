@@ -4,9 +4,9 @@
 
 ## 프로젝트 목적
 
-이 저장소는 **Open Tutor(Vivo Academy) 강좌 번들 제작 도구**다. 사용자가 `origin/<course-name>/` 폴더에 책, 강의 자료 등의 원본 리소스를 넣으면, AI Agent가 이를 Open Tutor 플랫폼에서 사용 가능한 강좌 번들로 변환하여 `converted/<course-name>/`에 저장하고 ZIP 파일을 생성한다.
+이 저장소는 **Open Tutorials 강좌 번들 제작 도구**다. 사용자가 `origin/<course-name>/` 폴더에 책, 강의 자료 등의 원본 리소스를 넣으면, AI Agent가 이를 Open Tutorials 플랫폼에서 사용 가능한 강좌 번들로 변환하여 `converted/<course-name>/`에 저장하고 ZIP 파일을 생성한다.
 
-Open Tutor는 카드(페이지) 단위 콘텐츠를 AI 튜터와 인터랙티브하게 학습하는 SaaS 플랫폼이다. 학습자는 콘텐츠를 보고 들으며, 체크포인트마다 AI와 QnA를 진행한다.
+Open Tutorials는 카드(페이지) 단위 콘텐츠를 AI 튜터와 인터랙티브하게 학습하는 SaaS 플랫폼이다. 학습자는 콘텐츠를 보고 들으며, 체크포인트마다 AI와 QnA를 진행한다.
 
 ## 폴더 구조
 
@@ -54,7 +54,7 @@ OpenTutorials-Bundler/
 
      - `toc[]`는 **장(chapter) → 절(section) → 항(subsection)** 계층 트리로 작성한다. 단, 3단계 모두를 반드시 사용할 필요는 없다. 내용 구조에 맞게 필요한 단계만 사용한다 (예: 단독 카드는 chapter→section(leaf) 2단계로도 충분).
      - 최하위 노드(실제 카드와 연결되는 노드)에는 반드시 `filename` 필드를 포함한다.
-     - 작성 완료 후 반드시 확인: **toc 트리의 모든 `filename` 값이 `cards[]`에 존재하고, `cards[]`의 모든 항목이 toc 트리의 leaf 노드에 존재하는가.** 불일치 시 Open Tutor 등록 오류.
+     - 작성 완료 후 반드시 확인: **toc 트리의 모든 `filename` 값이 `cards[]`에 존재하고, `cards[]`의 모든 항목이 toc 트리의 leaf 노드에 존재하는가.** 불일치 시 Open Tutorials 등록 오류.
 5. `origin/<course-name>/images/` 존재 시 → `converted/<course-name>/images/`로 복사
 6. ZIP 생성 전 **번들 검증 체크리스트** 전체 항목 통과 확인 (아래 섹션 참조)
 7. ZIP 생성: `converted/<course-name>/<course-name>.zip`
@@ -177,7 +177,7 @@ python tools/build_package.py <package-slug>
 
 ZIP 생성 전, 아래 항목을 순서대로 확인한다. 체크에 실패하면 ZIP을 만들지 않고 먼저 수정한다.
 
-> **운영 규칙**: Open Tutor 등록 또는 검증 중 새로운 오류가 발생하면, 원인을 파악한 즉시 아래 체크리스트에 항목을 추가한다. 오류는 반복되어서는 안 된다.
+> **운영 규칙**: Open Tutorials 등록 또는 검증 중 새로운 오류가 발생하면, 원인을 파악한 즉시 아래 체크리스트에 항목을 추가한다. 오류는 반복되어서는 안 된다.
 
 ### [C1] filename 형식 — `"cards/"` 접두어 금지
 - toc의 모든 `filename` 값: 파일명만 기재 (예: `"01-intro.mdx"`)
