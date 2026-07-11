@@ -25,30 +25,40 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
    - 사용자에게 어떤 주제의 강좌를 만들고 싶은지, 대상은 누구인지, 총 몇 페이지(카드) 분량으로 구성할지 묻습니다.
    - 강좌의 전체 목차(카드 리스트)와 각 카드에서 다룰 핵심 내용, 그리고 AI QnA 체크포인트를 어느 카드 뒤에 배치할지 제안합니다.
    
-2. **초안 작성 단계 (Drafting)**
-   - 기획이 승인되면, `wiki.md` 작성을 시작합니다. (튜터 AI가 알아야 할 배경지식)
-   - 각 `cards/*.mdx` 파일의 내용을 차례대로 작성합니다. 아래 **카드 작성 품질 기준**을 반드시 준수합니다.
-   
-3. **설정 및 매니페스트 파일 생성 단계 (Configuring)**
-   - 강좌 루트에 `package-manifest.json`을 작성합니다. 필수 프로토콜 항목(`bundler_protocol_version: "1.1.1"`, `author` (nickname, email, website), `target_age`, `category`)을 설정하고 제목 및 기본 정보를 정의합니다. 선택적으로 `tags` (Array of String)도 추가합니다.
-   - 생성된 카드들의 파일명과 체크포인트를 바탕으로 `config.json`을 작성합니다.
-   - `toc`는 **장(chapter) → 절(section) → 항(subsection)** 계층 트리로 작성합니다. 3단계를 모두 쓸 필요는 없으며, 콘텐츠 구조에 맞는 단계만 사용합니다.
-   - leaf 노드(실제 카드와 연결되는 최하위 노드)에는 반드시 `filename` 필드를 포함합니다.
-   - **`filename` 값은 파일명만 기재합니다** (`"01-intro.mdx"` ✓, `"cards/01-intro.mdx"` ✗)
-   - `config.json` 및 `package-manifest.json` 완성 후 아래 항목을 반드시 자가 검증합니다:
-      1. `package-manifest.json`의 `"bundler_protocol_version"`이 `"1.1.1"`인지, `author` (nickname 필수, email, website 선택), `target_age`와 `category` 필드가 올바른 값으로 존재하며 `tags`가 형식에 맞는지 확인
-     2. toc 트리의 모든 leaf node `filename` 집합 == `cards[]` 집합 (불일치 시 즉시 수정)
-     3. 모든 노드에 `type`, `title`, `description` 필드 존재
-     4. `slug`가 소문자 영문·숫자·하이픈으로만 구성되었는지 확인
-
-
-3-b. **패키지 번들 생성 단계 (패키지 포함 시)**
+2. **초안 작성 단3-b. **패키지 번들 생성 단계 (패키지 포함 시)**
    - 하나의 원본에서 여러 강좌를 나누어 만드는 경우, 모든 강좌 번들 생성 완료 후 실행한다.
-   - `packages/<package-slug>/` 폴더를 만들고 `package-manifest.json`을 작성한다.
+   - **packages 폴더는 더 이상 사용하지 않으며**, `converted/<package-slug>/` 폴더를 만들고 `package-manifest.json`을 작성한다.
    - **스키마 (통합 강좌 매니페스트)**:
      - `title` (string, 필수): 통합 강좌 전체 타이틀
      - `slug` (string, 필수): URL용 영문 식별자 (소문자·숫자·하이픈)
      - `description` (string, 필수): 전체 강좌 요약 설명
+     - `bundler_protocol_version` (string, 필수): 이 번들이 준수한 번들러 프로토콜 명세 버전 (`"1.1.1"`)
+     - `author` (object, 필수): 강좌 작성자 정보. `nickname`(필수), `email`(선택), `website`(선택) 필드 포함.
+     - `target_age` (string, 필수): 강좌 수강 대상 권장 연령대 (예: `"전연령"`, `"초등학생"`, `"10대"`, `"성인"`)
+     - `category` (string, 필수): 강좌의 대분류 카테고리 (예: `"Programming"`, `"Design"`, `"Marketing"`, `"Math"`)
+     - `tags` (array, 선택): 통합 강좌 자체의 태그 목록 (`string[]`)
+     - `thumbnail` (string, 필수): 플랫폼 아이콘 (`"icon:{ID}"`) 또는 이미지 파일명. 생략 시 기본값 `"icon:book"`. 아이콘 목록: `docs/bundling-guide/GUIDE_THUMBNAIL_INTEGRATION.md`
+     - `published` (boolean, 필수): 기본값 `true`
+     - `sequential_play` (boolean, 필수): 이전 강좌 완료 후 다음 진입 강제 여부. 기본값 `false`. 미션형/순서 의존 강좌에는 `true` 설정
+     - `force_checkpoint` (boolean, 필수): 체크포인트 통과 강제 여부. 기본값 `false`. 고난도 교육 과정에는 `true` 설정
+     - `version` (string, 선택/권장): 패키지 버전. 권장 포맷 `X.Y.Z` (예: `"1.0.0"`). 생략 시 기본값 `"1.0.0"`으로 자동 폴백
+     - `changelog` (string, 선택): 업데이트/수정 사항 요약 텍스트. 줄바꿈 시 `\n` 이스케이프 문자 사용. 생략 시 기본값 `"최초 릴리즈"`로 자동 폴백
+     - `courses` (array, 필수): 하위 강좌 메타데이터 배열 (CourseMeta 객체 순서대로). 각 원소:
+       - `slug` (string, 필수): 하위 강좌 데이터베이스 고유 식별자
+       - `title` (string, 필수): 파트/하위 강좌 노출 타이틀
+       - `description` (string, 필수): 해당 파트 요약 설명
+       - `tags` (array, 필수): 검색용 태그 **최소 3개** (기술명, 도구명, 실무 역량 등. 공백 없는 문자열)
+   - 패키지 검증 체크리스트 [P0]~[P6] 통과 확인
+   - `python tools/build_package.py <package-slug>` 실행 → `converted/<package-slug>/<package-slug>.zip` 생성 (package-manifest.json + thumbnail.png(선택) + courses/<slug>.zip 포함)
+   - 템플릿: `docs/bundling-guide/templates/package-manifest.json`
+
+4. **검토 및 패키징 안내 단계 (Review & Packaging)**
+   - 생성된 파일들이 아래 **4대 필수 검증 항목**을 통과하고 규격에 부합하는지 확인하기 위해 `python tools/build_course.py <course-slug>` (혹은 패키지 하위 강좌의 경우 `python tools/build_course.py <course-slug> --package <package-slug>`)를 실행하여 검증 통과 및 ZIP 파일 생성을 완료하라고 안내합니다.
+     - **package-manifest.json 존재 여부 및 형식 검증** (올바른 JSON)
+     - **패키지 메타데이터 필수 필드 검증** (title, slug, description, author, published, version, changelog, bundler_protocol_version, target_age, category, tags 등 필수 필드 검사)
+     - **필수 파일 검사** (`config.json`, `wiki.md` 필수 확인)
+     - **목차(TOC) 및 강의 카드(Cards) 일치성 검사** (toc leaf node filename 집합 == cards[] 집합)
+   - 빌더 스크립트는 생성 완료 후 ZIP 내부를 사후 검증(루트 내 package-manifest.json, config.json, wiki.md 및 폴더 구조 누락 여부 확인)하므로, 수동 압축은 절대 지양합니다.ription` (string, 필수): 전체 강좌 요약 설명
       - `bundler_protocol_version` (string, 필수): 이 번들이 준수한 번들러 프로토콜 명세 버전 (`"1.1.1"`)
       - `author` (object, 필수): 강좌 작성자 정보. `nickname`(필수), `email`(선택), `website`(선택) 필드 포함.
       - `target_age` (string, 필수): 강좌 수강 대상 권장 연령대 (예: `"전연령"`, `"초등학생"`, `"10대"`, `"성인"`)
@@ -66,11 +76,11 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
        - `description` (string, 필수): 해당 파트 요약 설명
        - `tags` (array, 필수): 검색용 태그 **최소 3개** (기술명, 도구명, 실무 역량 등. 공백 없는 문자열)
    - 패키지 검증 체크리스트 [P0]~[P6] 통과 확인
-   - `python tools/build_package.py <package-slug>` 실행 → `converted/<package-slug>.zip` 생성 (package-manifest.json + thumbnail.png(선택) + courses/<slug>.zip 포함)
+   - `python tools/build_package.py <package-slug>` 실행 → `converted/<package-slug>/<package-slug>.zip` 생성 (package-manifest.json + thumbnail.png(선택) + courses/<slug>.zip 포함)
    - 템플릿: `docs/bundling-guide/templates/package-manifest.json`
 
 4. **검토 및 패키징 안내 단계 (Review & Packaging)**
-   - 사용자에게 모든 파일의 코드를 제공한 뒤, 로컬 PC에서 폴더를 만들고 파일들을 저장한 후 `images` 폴더를 추가하여 ZIP으로 압축하라고 안내합니다.
+   - 생성된 파일들이 검증 체크리스트를 통과하고 규격에 부합하는지 확인하기 위해 `python tools/build_course.py <course-slug>` (혹은 패키지 하위 강좌의 경우 `python tools/build_course.py <course-slug> --package <package-slug>`)를 실행하여 검증 통과 및 ZIP 파일 생성을 완료하라고 안내합니다. 빌더 스크립트는 생성 완료 후 ZIP 내부를 사후 검증(루트 내 package-manifest.json, config.json, wiki.md 및 폴더 구조 누락 여부 확인)하므로, 수동 압축은 지양합니다.
 
 5. **Preview 생성 (선택) (Generating Preview)**
    - ZIP 생성 완료 후 사용자에게 제안한다:
