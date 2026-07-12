@@ -9,10 +9,31 @@ import sys
 import json
 import zipfile
 import os
+import re
 from collections import Counter
 
+def increment_patch_version(version_str: str) -> str:
+    prefix = ""
+    if version_str.startswith('v'):
+        prefix = "v"
+        version_str = version_str[1:]
+    
+    parts = version_str.split('.')
+    if len(parts) >= 3:
+        try:
+            patch = int(parts[2])
+            parts[2] = str(patch + 1)
+            return prefix + ".".join(parts[:3])
+        except ValueError:
+            pass
+    elif len(parts) == 2:
+        return prefix + f"{parts[0]}.{parts[1]}.1"
+    elif len(parts) == 1:
+        return prefix + f"{parts[0]}.0.1"
+    return "1.0.0"
 
-def build_package(package_slug: str) -> None:
+
+def build_package(package_slug: str, version_set: str = None, no_bump: bool = False) -> None:
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     package_dir = os.path.join(base_dir, "converted", package_slug)
     manifest_path = os.path.join(package_dir, "package-manifest.json")
@@ -62,14 +83,47 @@ def build_package(package_slug: str) -> None:
 
     # 프로토콜 버전 검증
     proto_ver = manifest.get("bundler_protocol_version")
-    if proto_ver and proto_ver != "1.1.1":
-        package_errors.append(f"package-manifest.json 오류: 프로토콜 버전이 '1.1.1'이어야 합니다 (현재: '{proto_ver}')")
-        
+    if proto_ver and proto_ver != "1.2.1":
+        package_errors.append(f"package-manifest.json 오류: 프로토콜 버전이 '1.2.1'이어야 합니다 (현재: '{proto_ver}')")
+
+    # [P0] target_age 형식 검증: all / x+ / min-max
+    target_age_val = manifest.get("target_age")
+    if target_age_val is not None and not re.match(r'^(all|\d+\+|\d+-\d+)$', str(target_age_val)):
+        package_errors.append(f"package-manifest.json 오류: target_age 형식이 잘못되었습니다: '{target_age_val}' ('all', 'x+', 'min-max' 형식만 허용, 예: 'all', '10+', '8-13')")
+
+    # [P0] language 형식 검증 (선택 필드)
+    language_val = manifest.get("language")
+    if language_val is not None and language_val not in ("ko", "en"):
+        package_errors.append(f"package-manifest.json 오류: language 값이 잘못되었습니다: '{language_val}' ('ko' 또는 'en'만 허용)")
+
     if package_errors:
         print("\n[ERROR] 패키지 매니페스트 검증 실패! 다음 오류들을 수정해주세요:")
         for err in package_errors:
             print(f"  - {err}")
         sys.exit(1)
+
+    # 버전 업데이트 로직 추가
+    updated = False
+    if version_set:
+        manifest["version"] = version_set
+        manifest["changelog"] = f"버전 {version_set} 업데이트"
+        updated = True
+        print(f"[INFO] 패키지 버전을 사용자가 지정한 값으로 설정합니다: {version_set}")
+    elif not no_bump:
+        old_version = manifest.get("version", "1.0.0")
+        new_version = increment_patch_version(old_version)
+        manifest["version"] = new_version
+        manifest["changelog"] = f"버전 {new_version} 업데이트"
+        updated = True
+        print(f"[INFO] 패키지 버전 자동 업데이트: {old_version} -> {new_version}")
+
+    if updated:
+        try:
+            with open(manifest_path, "w", encoding="utf-8") as mf:
+                json.dump(manifest, mf, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"ERROR: package-manifest.json 버전 업데이트 저장 실패: {e}")
+            sys.exit(1)
 
     # courses 빈 목록 검사
     if not courses:
@@ -205,8 +259,14 @@ def build_package(package_slug: str) -> None:
         print("썸네일: 없음 (기본 icon:book 적용)")
 
 
+def parse_args():
+    import argparse
+    parser = argparse.ArgumentParser(description="통합 번들(패키지) 빌더")
+    parser.add_argument("package_slug", help="빌드할 패키지의 슬러그")
+    parser.add_argument("--version-set", "-v", help="패키지의 버전을 명시적으로 지정합니다 (예: 1.0.5).")
+    parser.add_argument("--no-bump", action="store_true", help="버전을 올리지 않고 기존 버전을 그대로 유지합니다.")
+    return parser.parse_args()
+
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python tools/build_package.py <package-slug>")
-        sys.exit(1)
-    build_package(sys.argv[1])
+    args = parse_args()
+    build_package(args.package_slug, args.version_set, args.no_bump)

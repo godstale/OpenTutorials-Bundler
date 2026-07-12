@@ -19,7 +19,29 @@ def parse_args():
     parser.add_argument("--package", "-p", help="강좌가 속한 패키지의 슬러그 (패키지 하위 강좌 빌드 시)")
     parser.add_argument("--force-manifest", "-f", action="store_true", help="package-manifest.json 파일이 존재하더라도 강제로 재설정/재생성합니다.")
     parser.add_argument("--auto-manifest", "-a", action="store_true", help="package-manifest.json 파일이 없을 경우 자동으로 생성합니다.")
+    parser.add_argument("--version-set", "-v", help="강좌의 버전을 명시적으로 지정합니다 (예: 1.0.5).")
+    parser.add_argument("--no-bump", action="store_true", help="버전을 올리지 않고 기존 버전을 그대로 유지합니다.")
     return parser.parse_args()
+
+def increment_patch_version(version_str: str) -> str:
+    prefix = ""
+    if version_str.startswith('v'):
+        prefix = "v"
+        version_str = version_str[1:]
+    
+    parts = version_str.split('.')
+    if len(parts) >= 3:
+        try:
+            patch = int(parts[2])
+            parts[2] = str(patch + 1)
+            return prefix + ".".join(parts[:3])
+        except ValueError:
+            pass
+    elif len(parts) == 2:
+        return prefix + f"{parts[0]}.{parts[1]}.1"
+    elif len(parts) == 1:
+        return prefix + f"{parts[0]}.0.1"
+    return "1.0.0"
 
 def validate_slug(slug: str) -> bool:
     # 소문자 영문, 숫자, 하이픈(-)만 허용
@@ -69,7 +91,7 @@ def check_toc_node(node: Dict[str, Any], cards_in_toc: List[str], errors: List[s
             for child in children:
                 check_toc_node(child, cards_in_toc, errors)
 
-def build_course(course_slug: str, package_slug: str = None, force_manifest: bool = False, auto_manifest: bool = False) -> None:
+def build_course(course_slug: str, package_slug: str = None, force_manifest: bool = False, auto_manifest: bool = False, version_set: str = None, no_bump: bool = False) -> None:
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
     # 1. 강좌 경로 설정
@@ -140,7 +162,8 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
             "website": "https://hardcopyworld.com"
         })
         category = "Programming"
-        target_age = "전연령"
+        target_age = "all"
+        language = "ko"
         tags = []
         thumbnail = config_data.get("thumbnail", "icon:book")
 
@@ -152,6 +175,7 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
                 author = p_manifest.get("author", author)
                 category = p_manifest.get("category", category)
                 target_age = p_manifest.get("target_age", target_age)
+                language = p_manifest.get("language", language)
                 # 패키지 매니페스트 courses 목록에서 본인 정보 상속
                 for c in p_manifest.get("courses", []):
                     if c.get("slug") == course_slug:
@@ -176,9 +200,10 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
             "published": True,
             "version": "1.0.0",
             "changelog": "최초 릴리즈",
-            "bundler_protocol_version": "1.1.1",
+            "bundler_protocol_version": "1.2.1",
             "target_age": target_age,
             "category": category,
+            "language": language,
             "tags": tags
         }
 
@@ -224,8 +249,43 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
                     errors.append("[C8] package-manifest.json의 tags 배열은 최소 3개 이상의 태그를 포함해야 합니다.")
 
             # 프로토콜 버전
-            if manifest_data.get("bundler_protocol_version") != "1.1.1":
-                errors.append(f"[C8] 프로토콜 버전이 '1.1.1'이어야 합니다 (현재: '{manifest_data.get('bundler_protocol_version')}')")
+            if manifest_data.get("bundler_protocol_version") != "1.2.1":
+                errors.append(f"[C8] 프로토콜 버전이 '1.2.1'이어야 합니다 (현재: '{manifest_data.get('bundler_protocol_version')}')")
+
+            # [C13] target_age 형식 검증: all / x+ / min-max
+            target_age_val = manifest_data.get("target_age")
+            if target_age_val is not None and not re.match(r'^(all|\d+\+|\d+-\d+)$', str(target_age_val)):
+                errors.append(f"[C13] package-manifest.json의 target_age 형식이 잘못되었습니다: '{target_age_val}' ('all', 'x+', 'min-max' 형식만 허용, 예: 'all', '10+', '8-13')")
+
+            # [C13] language 형식 검증 (선택 필드)
+            language_val = manifest_data.get("language")
+            if language_val is not None and language_val not in ("ko", "en"):
+                errors.append(f"[C13] package-manifest.json의 language 값이 잘못되었습니다: '{language_val}' ('ko' 또는 'en'만 허용)")
+
+    # manifest_data 버전 업데이트 및 파일 저장 처리
+    if manifest_exists and not errors:
+        updated = False
+        if version_set:
+            manifest_data["version"] = version_set
+            manifest_data["changelog"] = f"버전 {version_set} 업데이트"
+            updated = True
+            print(f"[INFO] 버전을 사용자가 지정한 값으로 설정합니다: {version_set}")
+        elif not no_bump and manifest_exists:
+            # force_manifest나 auto_manifest로 방금 막 새로 만든 경우라면 굳이 바로 올릴 필요 없음
+            if not do_create_manifest:
+                old_version = manifest_data.get("version", "1.0.0")
+                new_version = increment_patch_version(old_version)
+                manifest_data["version"] = new_version
+                manifest_data["changelog"] = f"버전 {new_version} 업데이트"
+                updated = True
+                print(f"[INFO] 버전 자동 업데이트: {old_version} -> {new_version}")
+
+        if updated:
+            try:
+                with open(manifest_path, "w", encoding="utf-8") as mf:
+                    json.dump(manifest_data, mf, ensure_ascii=False, indent=2)
+            except Exception as e:
+                errors.append(f"package-manifest.json 버전 업데이트 저장 실패: {e}")
 
     # config.json 상세 검증
     if config_data:
@@ -392,4 +452,4 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
 
 if __name__ == "__main__":
     args = parse_args()
-    build_course(args.course_slug, args.package, args.force_manifest, args.auto_manifest)
+    build_course(args.course_slug, args.package, args.force_manifest, args.auto_manifest, args.version_set, args.no_bump)

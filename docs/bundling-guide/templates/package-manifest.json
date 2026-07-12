@@ -13,9 +13,10 @@
   "force_checkpoint": false,
   "version": "1.0.0",
   "changelog": "최초 릴리즈",
-  "bundler_protocol_version": "1.1.1",
-  "target_age": "전연령",
+  "bundler_protocol_version": "1.2.1",
+  "target_age": "all",
   "category": "Programming",
+  "language": "ko",
   "tags": ["IoT", "Arduino", "Embedded"],
   "courses": [
     {
