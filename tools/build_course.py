@@ -200,7 +200,7 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
             "published": True,
             "version": "1.0.0",
             "changelog": "최초 릴리즈",
-            "bundler_protocol_version": "1.3.1",
+            "bundler_protocol_version": "1.1.5",
             "target_age": target_age,
             "category": category,
             "language": language,
@@ -249,8 +249,8 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
                     errors.append("[C8] package-manifest.json의 tags 배열은 최소 3개 이상의 태그를 포함해야 합니다.")
 
             # 프로토콜 버전
-            if manifest_data.get("bundler_protocol_version") != "1.3.1":
-                errors.append(f"[C8] 프로토콜 버전이 '1.3.1'이어야 합니다 (현재: '{manifest_data.get('bundler_protocol_version')}')")
+            if manifest_data.get("bundler_protocol_version") != "1.1.5":
+                errors.append(f"[C8] 프로토콜 버전이 '1.1.5'이어야 합니다 (현재: '{manifest_data.get('bundler_protocol_version')}')")
 
             # [C13] target_age 형식 검증: all / x+ / min-max
             target_age_val = manifest_data.get("target_age")

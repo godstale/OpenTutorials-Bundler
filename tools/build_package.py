@@ -83,8 +83,8 @@ def build_package(package_slug: str, version_set: str = None, no_bump: bool = Fa
 
     # 프로토콜 버전 검증
     proto_ver = manifest.get("bundler_protocol_version")
-    if proto_ver and proto_ver != "1.3.1":
-        package_errors.append(f"package-manifest.json 오류: 프로토콜 버전이 '1.3.1'이어야 합니다 (현재: '{proto_ver}')")
+    if proto_ver and proto_ver != "1.1.5":
+        package_errors.append(f"package-manifest.json 오류: 프로토콜 버전이 '1.1.5'이어야 합니다 (현재: '{proto_ver}')")
 
     # [P0] target_age 형식 검증: all / x+ / min-max
     target_age_val = manifest.get("target_age")

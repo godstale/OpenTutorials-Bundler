@@ -1,6 +1,6 @@
 # Open Tutorials Bundler
 
-> **Course Bundler Protocol Version**: `v1.3.1`
+> **Course Bundler Protocol Version**: `v1.1.5`
 
 
 AI Agent(Claude Code, GitHub Copilot, Gemini CLI 등)를 활용하여 PDF, DOCX 등 원본 자료를 **Open Tutorials** 플랫폼에 등록 가능한 강좌 번들(ZIP)로 자동 변환하는 워크스페이스입니다.
@@ -192,7 +192,7 @@ python tools/build_course.py my-course
   "published": true,
   "version": "1.0.0",
   "changelog": "최초 릴리즈",
-  "bundler_protocol_version": "1.3.1",
+  "bundler_protocol_version": "1.1.5",
   "target_age": "all",
   "category": "Programming",
   "language": "ko",
@@ -201,11 +201,11 @@ python tools/build_course.py my-course
 }
 ```
 
-- `bundler_protocol_version` (필수): 이 번들이 준수하는 프로토콜 버전. 현재 `"1.3.1"` 고정이며, `tools/build_course.py`가 값이 다르거나 누락되면 빌드를 중단합니다.
+- `bundler_protocol_version` (필수): 이 번들이 준수하는 프로토콜 버전. 현재 `"1.1.5"` 고정이며, `tools/build_course.py`가 값이 다르거나 누락되면 빌드를 중단합니다.
 - `version` (필수): 강좌 자체의 버전(Semantic Versioning 권장). 재빌드 시 기본적으로 패치 버전이 자동 증가합니다.
-- `target_age` (필수, v1.2.1): `all`(전연령) / `x+`(x세 이상) / `min-max`(연령대 범위) 형식만 허용합니다. `"전연령"` 같은 자유 문자열은 금지됩니다.
-- `language` (선택, v1.2.1): `"ko"` 또는 `"en"`만 허용, 생략 시 기본값 `"ko"`.
-- `license` (선택, v1.3.0): 강좌 콘텐츠의 라이선스. `CC-BY-4.0` 등 CC 계열 값, `all-rights-reserved`(기본값), 또는 직접 작성한 라이선스를 쓸 경우 `custom`(+ `license_file`로 ZIP에 포함할 라이선스 전문 파일명 지정) 중 하나를 선택합니다. 전체 목록은 [`protocol/protocol.md`](protocol/protocol.md) 4.1.1절 참조.
+- `target_age` (필수, v1.1.3): `all`(전연령) / `x+`(x세 이상) / `min-max`(연령대 범위) 형식만 허용합니다. `"전연령"` 같은 자유 문자열은 금지됩니다.
+- `language` (선택, v1.1.3): `"ko"` 또는 `"en"`만 허용, 생략 시 기본값 `"ko"`.
+- `license` (선택, v1.1.4): 강좌 콘텐츠의 라이선스. `CC-BY-4.0` 등 CC 계열 값, `all-rights-reserved`(기본값), 또는 직접 작성한 라이선스를 쓸 경우 `custom`(+ `license_file`로 ZIP에 포함할 라이선스 전문 파일명 지정) 중 하나를 선택합니다. 전체 목록은 [`protocol/protocol.md`](protocol/protocol.md) 4.1.1절 참조.
 - `author.nickname` (필수): 작가 닉네임.
 
 ### config.json
@@ -295,7 +295,7 @@ python tools/build_course.py my-course
   "force_checkpoint": false,
   "version": "1.0.0",
   "changelog": "최초 릴리즈",
-  "bundler_protocol_version": "1.3.1",
+  "bundler_protocol_version": "1.1.5",
   "target_age": "all",
   "category": "Programming",
   "language": "ko",
