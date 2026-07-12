@@ -83,8 +83,8 @@ def build_package(package_slug: str, version_set: str = None, no_bump: bool = Fa
 
     # 프로토콜 버전 검증
     proto_ver = manifest.get("bundler_protocol_version")
-    if proto_ver and proto_ver != "1.2.1":
-        package_errors.append(f"package-manifest.json 오류: 프로토콜 버전이 '1.2.1'이어야 합니다 (현재: '{proto_ver}')")
+    if proto_ver and proto_ver != "1.3.1":
+        package_errors.append(f"package-manifest.json 오류: 프로토콜 버전이 '1.3.1'이어야 합니다 (현재: '{proto_ver}')")
 
     # [P0] target_age 형식 검증: all / x+ / min-max
     target_age_val = manifest.get("target_age")
@@ -95,6 +95,23 @@ def build_package(package_slug: str, version_set: str = None, no_bump: bool = Fa
     language_val = manifest.get("language")
     if language_val is not None and language_val not in ("ko", "en"):
         package_errors.append(f"package-manifest.json 오류: language 값이 잘못되었습니다: '{language_val}' ('ko' 또는 'en'만 허용)")
+
+    # license / license_file 검증 (선택 필드)
+    license_val = manifest.get("license")
+    allowed_licenses = (
+        "CC-BY-4.0", "CC-BY-SA-4.0", "CC-BY-NC-4.0", "CC-BY-NC-SA-4.0",
+        "CC-BY-ND-4.0", "CC-BY-NC-ND-4.0", "CC0-1.0", "all-rights-reserved", "custom"
+    )
+    license_file_val = manifest.get("license_file")
+    if license_val is not None and license_val not in allowed_licenses:
+        package_errors.append(f"package-manifest.json 오류: license 값이 잘못되었습니다: '{license_val}' (허용값: {', '.join(allowed_licenses)})")
+    elif license_val == "custom" and (not license_file_val or not str(license_file_val).strip()):
+        package_errors.append("package-manifest.json 오류: license가 'custom'인 경우 license_file 필드가 반드시 필요합니다.")
+    # license_file은 custom이 아니어도(제3자 리소스 고지 목적) 선택적으로 사용 가능하므로, 지정된 경우 항상 실재 여부를 검증한다
+    if license_file_val:
+        license_file_path = os.path.join(package_dir, license_file_val)
+        if not os.path.exists(license_file_path):
+            package_errors.append(f"package-manifest.json 오류: license_file에 지정된 파일이 존재하지 않습니다: {license_file_path}")
 
     if package_errors:
         print("\n[ERROR] 패키지 매니페스트 검증 실패! 다음 오류들을 수정해주세요:")
@@ -195,12 +212,18 @@ def build_package(package_slug: str, version_set: str = None, no_bump: bool = Fa
     if os.path.exists(out_path):
         os.remove(out_path)
 
-    # 통합 번들 ZIP 생성: package-manifest.json + thumbnail.png(선택) + courses/<slug>.zip
+    license_file_path = None
+    if license_file_val:
+        license_file_path = os.path.join(package_dir, license_file_val)
+
+    # 통합 번들 ZIP 생성: package-manifest.json + thumbnail.png(선택) + LICENSE(선택) + courses/<slug>.zip
     with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as zf:
         zf.write(manifest_path, "package-manifest.json")
         if thumb_path:
             # [P6] 원본 파일명과 무관하게 ZIP 내부명은 항상 thumbnail.png로 고정
             zf.write(thumb_path, "thumbnail.png")
+        if license_file_path and os.path.exists(license_file_path):
+            zf.write(license_file_path, license_file_val)
         for slug in slugs:
             zf.write(course_zip_paths[slug], f"courses/{slug}.zip")
 
@@ -217,7 +240,12 @@ def build_package(package_slug: str, version_set: str = None, no_bump: bool = Fa
             # package-manifest.json 검사
             if "package-manifest.json" not in namelist:
                 zip_errors.append("통합 ZIP 루트에 'package-manifest.json' 파일이 누락되었습니다.")
-                
+
+            # license_file(라이선스/제3자 리소스 고지 파일) ZIP 포함 여부 검사
+            if license_file_path and license_file_val not in namelist:
+                zip_errors.append(f"통합 ZIP 루트에 커스텀 라이선스 파일 '{license_file_val}'이 누락되었습니다.")
+
+
             # courses/ 하위 강좌 ZIP들 존재 검사 및 내부에 config.json 존재 여부 사후 검사
             for slug in slugs:
                 expected_zip = f"courses/{slug}.zip"

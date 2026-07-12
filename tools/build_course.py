@@ -200,7 +200,7 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
             "published": True,
             "version": "1.0.0",
             "changelog": "최초 릴리즈",
-            "bundler_protocol_version": "1.2.1",
+            "bundler_protocol_version": "1.3.1",
             "target_age": target_age,
             "category": category,
             "language": language,
@@ -249,8 +249,8 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
                     errors.append("[C8] package-manifest.json의 tags 배열은 최소 3개 이상의 태그를 포함해야 합니다.")
 
             # 프로토콜 버전
-            if manifest_data.get("bundler_protocol_version") != "1.2.1":
-                errors.append(f"[C8] 프로토콜 버전이 '1.2.1'이어야 합니다 (현재: '{manifest_data.get('bundler_protocol_version')}')")
+            if manifest_data.get("bundler_protocol_version") != "1.3.1":
+                errors.append(f"[C8] 프로토콜 버전이 '1.3.1'이어야 합니다 (현재: '{manifest_data.get('bundler_protocol_version')}')")
 
             # [C13] target_age 형식 검증: all / x+ / min-max
             target_age_val = manifest_data.get("target_age")
@@ -261,6 +261,23 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
             language_val = manifest_data.get("language")
             if language_val is not None and language_val not in ("ko", "en"):
                 errors.append(f"[C13] package-manifest.json의 language 값이 잘못되었습니다: '{language_val}' ('ko' 또는 'en'만 허용)")
+
+            # [C14] license / license_file 검증 (선택 필드)
+            license_val = manifest_data.get("license")
+            allowed_licenses = (
+                "CC-BY-4.0", "CC-BY-SA-4.0", "CC-BY-NC-4.0", "CC-BY-NC-SA-4.0",
+                "CC-BY-ND-4.0", "CC-BY-NC-ND-4.0", "CC0-1.0", "all-rights-reserved", "custom"
+            )
+            license_file_val = manifest_data.get("license_file")
+            if license_val is not None and license_val not in allowed_licenses:
+                errors.append(f"[C14] package-manifest.json의 license 값이 잘못되었습니다: '{license_val}' (허용값: {', '.join(allowed_licenses)})")
+            elif license_val == "custom" and (not license_file_val or not str(license_file_val).strip()):
+                errors.append("[C14] license가 'custom'인 경우 license_file 필드가 반드시 필요합니다.")
+            # license_file은 custom이 아니어도(제3자 리소스 고지 목적) 선택적으로 사용 가능하므로, 지정된 경우 항상 실재 여부를 검증한다
+            if license_file_val:
+                license_file_path = os.path.join(course_dir, license_file_val)
+                if not os.path.exists(license_file_path):
+                    errors.append(f"[C14] license_file에 지정된 파일이 존재하지 않습니다: {license_file_path}")
 
     # manifest_data 버전 업데이트 및 파일 저장 처리
     if manifest_exists and not errors:
@@ -393,6 +410,9 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
 
     print(f"[*] ZIP 생성 시작: {zip_out_path}")
     
+    license_file_val = manifest_data.get("license_file")
+    license_file_path = os.path.join(course_dir, license_file_val) if license_file_val else None
+
     with zipfile.ZipFile(zip_out_path, 'w', zipfile.ZIP_DEFLATED) as zf:
         # package-manifest.json
         zf.write(manifest_path, "package-manifest.json")
@@ -400,7 +420,10 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
         zf.write(config_path, "config.json")
         # wiki.md
         zf.write(wiki_path, "wiki.md")
-        
+        # LICENSE / 제3자 리소스 고지 파일 (license_file이 지정된 경우)
+        if license_file_path and os.path.exists(license_file_path):
+            zf.write(license_file_path, license_file_val)
+
         # cards/
         if os.path.exists(cards_dir):
             for root, dirs, files in os.walk(cards_dir):
@@ -431,9 +454,16 @@ def build_course(course_slug: str, package_slug: str = None, force_manifest: boo
                 if required not in namelist:
                     zip_errors.append(f"ZIP 내부에 '{required}' 파일이 누락되었습니다.")
             
+            # license_file(라이선스/제3자 리소스 고지 파일) ZIP 포함 여부 검사
+            if license_file_val and license_file_val not in namelist:
+                zip_errors.append(f"ZIP 내부에 커스텀 라이선스 파일 '{license_file_val}'이 누락되었습니다.")
+
             # cards 및 images 경로 검사
+            root_allowed_files = {"package-manifest.json", "config.json", "wiki.md"}
+            if license_file_val:
+                root_allowed_files.add(license_file_val)
             for name in namelist:
-                if name in ["package-manifest.json", "config.json", "wiki.md"]:
+                if name in root_allowed_files:
                     continue
                 if not (name.startswith("cards/") or name.startswith("images/")):
                     zip_errors.append(f"ZIP 내부에 올바르지 않은 경로의 파일이 포함되어 있습니다: '{name}' (cards/ 또는 images/ 하위 경로여야 합니다.)")

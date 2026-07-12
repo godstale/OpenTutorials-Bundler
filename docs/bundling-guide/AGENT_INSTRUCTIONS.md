@@ -13,7 +13,7 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
 모든 강좌는 최종적으로 아래 구조의 파일들을 포함한 ZIP 파일로 패키징되어야 합니다.
 당신의 역할은 아래 파일들의 텍스트 내용(코드)을 모두 작성해주는 것입니다.
 
-1. `package-manifest.json`: 강좌의 메타데이터, 프로토콜 버전, 작성자 정보(닉네임, 이메일, 홈페이지), 대상 연령대 및 카테고리를 정의하는 파일 (프로토콜 1.2.1 기준 필수).
+1. `package-manifest.json`: 강좌의 메타데이터, 프로토콜 버전, 작성자 정보(닉네임, 이메일, 홈페이지), 대상 연령대, 카테고리 및 라이선스를 정의하는 파일 (프로토콜 1.3.1 기준 필수).
 2. `config.json`: 강좌의 메타데이터, 카드(페이지) 순서, 체크포인트 트리거 위치 정의.
 3. `cards/*.mdx` 또는 `cards/*.json`: 각 페이지의 본문. (1페이지 = 1 MDX 파일 또는 동영상 카드 JSON 파일). 마크다운과 컴포넌트 활용 가능. 이미지 경로는 로컬 경로(`../images/파일명.png` 등)로 작성.
 4. `wiki.md`: AI Agent(학습자를 가르칠 튜터 AI)가 참고할 강좌 전체의 배경 지식, 맥락, 핵심 용어 사전.
@@ -24,20 +24,31 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
 1. **기획 단계 (Planning)**
    - 사용자에게 어떤 주제의 강좌를 만들고 싶은지, 대상은 누구인지, 총 몇 페이지(카드) 분량으로 구성할지 묻습니다.
    - 강좌의 전체 목차(카드 리스트)와 각 카드에서 다룰 핵심 내용, 그리고 AI QnA 체크포인트를 어느 카드 뒤에 배치할지 제안합니다.
-   
-2. **초안 작성 단3-b. **패키지 번들 생성 단계 (패키지 포함 시)**
+
+2. **필수 메타데이터 인터뷰 단계 (Creator Interview)**
+   - 원고만으로 `target_age`, `category`, `license`가 명확히 판단되지 않으면 임의로 추정하지 말고, `protocol/creator-interview-guide.md`의 질문 양식을 참고해 사용자에게 확인 질문을 합니다.
+   - **라이선스(license) 확인**: 강좌 콘텐츠에 적용할 라이선스를 지정할지 물어봅니다. 지정하지 않으면 기본값 `"all-rights-reserved"`가 적용됨을 안내합니다.
+   - **제3자 원저작물 각색 여부 확인**: 이 강좌가 다른 책, 영상, 이미지, 오픈소스 코드 등 제3자의 원저작물을 각색·인용해서 만들어졌는지 확인합니다. "예"인 경우 어떤 자료를 누가 만들었고 어떤 조건으로 사용 가능한지 확인받아, `license_file`(예: `LICENSE.md`)에 출처·라이선스·각색 범위·주의사항을 고지합니다. **출처나 라이선스 정보를 AI가 임의로 추정해서 채우지 않습니다.**
+
+3. **초안 작성 단계 (Draft)**
+   - 확정된 메타데이터로 `package-manifest.json`을 작성하고, 이어서 `wiki.md` → `cards/*.mdx`(또는 `cards/*.json`) → `config.json` 순서로 강좌 파일을 생성합니다.
+   - 제3자 리소스 고지가 필요하다고 확인되었다면 `LICENSE.md`(또는 지정한 `license_file` 파일명)를 강좌 폴더 루트에 작성합니다.
+
+3-b. **패키지 번들 생성 단계 (패키지 포함 시)**
    - 하나의 원본에서 여러 강좌를 나누어 만드는 경우, 모든 강좌 번들 생성 완료 후 실행한다.
    - **packages 폴더는 더 이상 사용하지 않으며**, `converted/<package-slug>/` 폴더를 만들고 `package-manifest.json`을 작성한다.
    - **스키마 (통합 강좌 매니페스트)**:
      - `title` (string, 필수): 통합 강좌 전체 타이틀
      - `slug` (string, 필수): URL용 영문 식별자 (소문자·숫자·하이픈)
      - `description` (string, 필수): 전체 강좌 요약 설명
-     - `bundler_protocol_version` (string, 필수): 이 번들이 준수한 번들러 프로토콜 명세 버전 (`"1.2.1"`)
+     - `bundler_protocol_version` (string, 필수): 이 번들이 준수한 번들러 프로토콜 명세 버전 (`"1.3.1"`)
      - `author` (object, 필수): 강좌 작성자 정보. `nickname`(필수), `email`(선택), `website`(선택) 필드 포함.
      - `target_age` (string, 필수): 강좌 수강 대상 권장 연령대. `all`(전연령), `x+`(x세 이상), `min-max`(연령대 범위) 형식만 허용 (예: `"all"`, `"10+"`, `"8-13"`)
      - `category` (string, 필수): 강좌의 대분류 카테고리 (예: `"Programming"`, `"Design"`, `"Marketing"`, `"Math"`)
      - `language` (string, 선택): 강좌 패키지의 주 언어. 기본값 `"ko"` (지원값: `"ko"`, `"en"`)
      - `tags` (array, 선택): 통합 강좌 자체의 태그 목록 (`string[]`)
+     - `license` (string, 선택): 강좌 콘텐츠 라이선스. 사전 정의 값(`CC-BY-4.0`, `CC-BY-SA-4.0`, `CC-BY-NC-4.0`, `CC-BY-NC-SA-4.0`, `CC-BY-ND-4.0`, `CC-BY-NC-ND-4.0`, `CC0-1.0`, `all-rights-reserved`) 또는 `"custom"`. 생략 시 기본값 `"all-rights-reserved"`
+     - `license_file` (string, `license`가 `"custom"`일 때 필수, 그 외에는 제3자 리소스 고지 목적으로 선택 사용 가능): ZIP 루트에 포함할 라이선스/고지 파일명 (예: `"LICENSE.md"`)
      - `thumbnail` (string, 필수): 플랫폼 아이콘 (`"icon:{ID}"`) 또는 이미지 파일명. 생략 시 기본값 `"icon:book"`. 아이콘 목록: `docs/bundling-guide/GUIDE_THUMBNAIL_INTEGRATION.md`
      - `published` (boolean, 필수): 기본값 `true`
      - `sequential_play` (boolean, 필수): 이전 강좌 완료 후 다음 진입 강제 여부. 기본값 `false`. 미션형/순서 의존 강좌에는 `true` 설정
@@ -59,30 +70,8 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
      - **패키지 메타데이터 필수 필드 검증** (title, slug, description, author, published, version, changelog, bundler_protocol_version, target_age, category, tags 등 필수 필드 검사)
      - **필수 파일 검사** (`config.json`, `wiki.md` 필수 확인)
      - **목차(TOC) 및 강의 카드(Cards) 일치성 검사** (toc leaf node filename 집합 == cards[] 집합)
-   - 빌더 스크립트는 생성 완료 후 ZIP 내부를 사후 검증(루트 내 package-manifest.json, config.json, wiki.md 및 폴더 구조 누락 여부 확인)하므로, 수동 압축은 절대 지양합니다.ription` (string, 필수): 전체 강좌 요약 설명
-      - `bundler_protocol_version` (string, 필수): 이 번들이 준수한 번들러 프로토콜 명세 버전 (`"1.2.1"`)
-      - `author` (object, 필수): 강좌 작성자 정보. `nickname`(필수), `email`(선택), `website`(선택) 필드 포함.
-      - `target_age` (string, 필수): 강좌 수강 대상 권장 연령대. `all`(전연령), `x+`(x세 이상), `min-max`(연령대 범위) 형식만 허용 (예: `"all"`, `"10+"`, `"8-13"`)
-     - `category` (string, 필수): 강좌의 대분류 카테고리 (예: `"Programming"`, `"Design"`, `"Marketing"`, `"Math"`)
-     - `language` (string, 선택): 강좌 패키지의 주 언어. 기본값 `"ko"` (지원값: `"ko"`, `"en"`)
-     - `tags` (array, 선택): 통합 강좌 자체의 태그 목록 (`string[]`)
-     - `thumbnail` (string, 필수): 플랫폼 아이콘 (`"icon:{ID}"`) 또는 이미지 파일명. 생략 시 기본값 `"icon:book"`. 아이콘 목록: `docs/bundling-guide/GUIDE_THUMBNAIL_INTEGRATION.md`
-     - `published` (boolean, 필수): 기본값 `true`
-     - `sequential_play` (boolean, 필수): 이전 강좌 완료 후 다음 진입 강제 여부. 기본값 `false`. 미션형/순서 의존 강좌에는 `true` 설정
-     - `force_checkpoint` (boolean, 필수): 체크포인트 통과 강제 여부. 기본값 `false`. 고난도 교육 과정에는 `true` 설정
-     - `version` (string, 선택/권장): 패키지 버전. 권장 포맷 `X.Y.Z` (예: `"1.0.0"`). 생략 시 기본값 `"1.0.0"`으로 자동 폴백
-     - `changelog` (string, 선택): 업데이트/수정 사항 요약 텍스트. 줄바꿈 시 `\n` 이스케이프 문자 사용. 생략 시 기본값 `"최초 릴리즈"`로 자동 폴백
-     - `courses` (array, 필수): 하위 강좌 메타데이터 배열 (CourseMeta 객체 순서대로). 각 원소:
-       - `slug` (string, 필수): 하위 강좌 데이터베이스 고유 식별자
-       - `title` (string, 필수): 파트/하위 강좌 노출 타이틀
-       - `description` (string, 필수): 해당 파트 요약 설명
-       - `tags` (array, 필수): 검색용 태그 **최소 3개** (기술명, 도구명, 실무 역량 등. 공백 없는 문자열)
-   - 패키지 검증 체크리스트 [P0]~[P6] 통과 확인
-   - `python tools/build_package.py <package-slug>` 실행 → `converted/<package-slug>/<package-slug>.zip` 생성 (package-manifest.json + thumbnail.png(선택) + courses/<slug>.zip 포함)
-   - 템플릿: `docs/bundling-guide/templates/package-manifest.json`
-
-4. **검토 및 패키징 안내 단계 (Review & Packaging)**
-   - 생성된 파일들이 검증 체크리스트를 통과하고 규격에 부합하는지 확인하기 위해 `python tools/build_course.py <course-slug>` (혹은 패키지 하위 강좌의 경우 `python tools/build_course.py <course-slug> --package <package-slug>`)를 실행하여 검증 통과 및 ZIP 파일 생성을 완료하라고 안내합니다. 빌더 스크립트는 생성 완료 후 ZIP 내부를 사후 검증(루트 내 package-manifest.json, config.json, wiki.md 및 폴더 구조 누락 여부 확인)하므로, 수동 압축은 지양합니다.
+   - **버전 확인 (필수 체크사항)**: `bundler_protocol_version`이 `protocol/protocol.md`의 현재 `Version:` 값과 정확히 일치하는지 확인합니다 (불일치 시 빌더가 즉시 빌드를 중단합니다). 콘텐츠나 메타데이터를 변경해 재생성하는 경우 `version` 필드가 갱신되는지도 함께 확인합니다 (`build_course.py`/`build_package.py`는 기본적으로 패치 버전을 자동 +1 합니다).
+   - 빌더 스크립트는 생성 완료 후 ZIP 내부를 사후 검증(루트 내 package-manifest.json, config.json, wiki.md 및 폴더 구조 누락 여부 확인)하므로, 수동 압축은 절대 지양합니다.
 
 5. **Preview 생성 (선택) (Generating Preview)**
    - ZIP 생성 완료 후 사용자에게 제안한다:
@@ -135,7 +124,10 @@ Vivo Academy는 AI 기반 학습 플랫폼으로, 학습자가 페이지(카드)
 - **패키지 포함 시 강좌 순서 표시 필수**: 하나의 원본을 여러 강좌로 나눌 때, 각 강좌의 slug는 `<course-name>-ch01` 형식으로, `config.json`의 `title`은 `"Part 1: <강좌 제목>"` 또는 `"Chapter 1: <강좌 제목>"` 형식으로 순서를 명시한다.
 - **패키지 courses[] 형식 준수**: `courses[]`는 슬러그 문자열 배열이 아닌 **CourseMeta 객체 배열**이다. 각 원소에 `slug`, `title`, `description`, `tags` 4개 필드를 모두 포함해야 한다. 기존 문자열 배열 형식은 `build_package.py`가 오류로 거부한다.
 - **tags 검색 최적화**: 각 하위 강좌의 `tags` 배열에는 핵심 기술명·도구명·실무 역량 키워드를 **3개 이상** 반드시 추출하여 기재한다. tags는 플랫폼 검색 화면의 매칭 소스로 직접 활용된다.
-- **프로토콜 버전 명시 필수**: 강좌 번들 파일을 제작할 때 사용된 프로토콜 버전을 반드시 `package-manifest.json` 의 `bundler_protocol_version` 필드에 정확히 명시해야 합니다. (예: `"1.2.1"`)
+- **프로토콜 버전 명시 필수**: 강좌 번들 파일을 제작할 때 사용된 프로토콜 버전을 반드시 `package-manifest.json` 의 `bundler_protocol_version` 필드에 정확히 명시해야 합니다. (예: `"1.3.1"`)
+- **라이선스(license) 지정 권장**: 제작자가 명시적으로 라이선스를 지정하지 않으면 `license` 필드를 생략하여 기본값 `"all-rights-reserved"`가 적용되도록 둡니다. 임의로 CC 라이선스 등을 추측해서 넣지 말고, 재사용 허용 범위가 불분명하면 제작자에게 직접 확인하십시오. 사전 정의 목록에 없는 라이선스를 직접 작성하는 경우 `license: "custom"` + `license_file`(예: `"LICENSE.md"`)로 지정하고, 해당 라이선스 전문 파일을 강좌 폴더 루트에 생성해야 합니다.
+- **제3자 리소스 고지**: 강좌가 다른 책·영상·이미지·오픈소스 등 제3자 원저작물을 각색·인용한 경우, `license`가 `"custom"`이 아니어도 `license_file`(예: `"LICENSE.md"`)을 첨부하여 원저작물 출처·라이선스·각색 범위·주의사항을 고지할 수 있습니다 (`protocol/protocol.md` 4.1.2절). Open Tutorials 앱은 이 내용을 강좌 상세 화면에서 학습자에게 노출하므로, 원저작물 각색 여부는 반드시 제작자에게 확인 후 정확한 정보로만 작성하십시오.
+- **버전 확인 (필수)**: 강좌 번들을 새로 만들거나 재생성할 때는 항상 `bundler_protocol_version`이 현재 프로토콜 버전(`protocol/protocol.md`의 `Version:`)과 일치하는지, `version` 필드가 이번 변경사항을 반영해 갱신되었는지 확인하십시오.
 - **동영상 자막 사용 시 탐색 편의성 최적화**: 
   - 새롭게 추가된 동영상 강좌의 경우 자막 기능을 선택적으로 활성화하여 사용할 수 있습니다.
   - 동영상 자막을 사용하는 경우에는 영상의 모든 자막을 전부 넣기보다, **주요 포인트의 자막 또는 안내 메시지**를 포함시킴으로써 학습자가 탐색 패널을 통해 원하는 구간으로 쉽게 탐색(Seek)하고 이동할 수 있도록 배려해야 합니다.

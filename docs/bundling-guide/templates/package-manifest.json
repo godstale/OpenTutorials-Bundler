@@ -13,11 +13,12 @@
   "force_checkpoint": false,
   "version": "1.0.0",
   "changelog": "최초 릴리즈",
-  "bundler_protocol_version": "1.2.1",
+  "bundler_protocol_version": "1.3.1",
   "target_age": "all",
   "category": "Programming",
   "language": "ko",
   "tags": ["IoT", "Arduino", "Embedded"],
+  "license": "all-rights-reserved",
   "courses": [
     {
       "slug": "course-slug-ch01",
